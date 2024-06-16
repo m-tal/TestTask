@@ -6,13 +6,18 @@
     public enum CharType
     {
         /// <summary>
+        /// Прочие
+        /// </summary>
+        Others,
+
+        /// <summary>
         /// Гласные
         /// </summary>
-        Vowel,
+        Vowels,
 
         /// <summary>
         /// Согласные
         /// </summary>
-        Consonants
-    }
+        Consonants        
+    }    
 }

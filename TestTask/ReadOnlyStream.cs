@@ -1,11 +1,13 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using System.Text;
 
 namespace TestTask
 {
     public class ReadOnlyStream : IReadOnlyStream
     {
-        private Stream _localStream;
+        private StreamReader _localStream;
+        private string lsCurrentString;
+        private int currentCharIndex;
 
         /// <summary>
         /// Конструктор класса. 
@@ -16,11 +18,12 @@ namespace TestTask
         public ReadOnlyStream(string fileFullPath)
         {
             IsEof = true;
+            IsEoStr = true;
 
             // TODO : Заменить на создание реального стрима для чтения файла!
-            _localStream = null;
+            _localStream = new StreamReader(fileFullPath);
         }
-                
+
         /// <summary>
         /// Флаг окончания файла.
         /// </summary>
@@ -31,15 +34,52 @@ namespace TestTask
         }
 
         /// <summary>
-        /// Ф-ция чтения следующего символа из потока.
-        /// Если произведена попытка прочитать символ после достижения конца файла, метод 
-        /// должен бросать соответствующее исключение
+        /// Флаг окончания строки.
         /// </summary>
-        /// <returns>Считанный символ.</returns>
+        public bool IsEoStr
+        {
+            get;
+            private set;
+        }
+
+        public void DisposeStream()
+        {
+            _localStream.Dispose();
+        }
+
+        /// <summary>
+        /// Ф-ция чтения следующего символа из потока.
+        /// </summary>
+        /// <returns>Считанный символ или, при достижении конца файла,- нулевой указатель (\0).</returns>
         public char ReadNextChar()
         {
             // TODO : Необходимо считать очередной символ из _localStream
-            throw new NotImplementedException();
+            if (IsEoStr)
+            {
+                IsEof = false;
+                IsEoStr = false;
+                currentCharIndex = 0;
+
+                lsCurrentString = _localStream.ReadLine();
+
+                if (lsCurrentString == null)
+                {
+                    IsEof = true;
+                    IsEoStr = true;
+                    return '\0';
+                }
+            }
+
+            if (lsCurrentString.Length == currentCharIndex)
+            {
+                IsEoStr = true;
+                return '\0';
+            }
+
+            char c = lsCurrentString[currentCharIndex];
+            currentCharIndex++;
+
+            return c;
         }
 
         /// <summary>
@@ -53,7 +93,7 @@ namespace TestTask
                 return;
             }
 
-            _localStream.Position = 0;
+            _localStream.BaseStream.Position = 0;
             IsEof = false;
         }
     }
